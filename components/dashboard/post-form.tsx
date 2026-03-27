@@ -1,125 +1,123 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { 
-  Plus, 
-  ImageIcon, 
-  Instagram, 
-  ChevronLeft, 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import {
+  Plus,
+  ImageIcon,
+  Instagram,
+  ChevronLeft,
   ChevronRight,
   AtSign,
   Link2,
   Smile,
   MapPin,
   Hash,
-  Settings2
-} from "lucide-react"
-import { type Post, sampleImages, strategies } from "@/lib/posts-data"
+  Settings2,
+} from 'lucide-react';
+import { type Post, sampleImages, strategies } from '@/lib/posts-data';
 
 interface PostFormProps {
-  initialData?: Post
-  mode: "create" | "edit"
+  initialData?: Post;
+  mode: 'create' | 'edit';
 }
 
-const platforms = [
-  { id: "instagram", label: "Instagram", icon: Instagram, color: "#E1306C" },
-]
+const platforms = [{ id: 'instagram', label: 'Instagram', icon: Instagram, color: '#E1306C' }];
 
 const scheduleOptions = [
-  { id: "draft", label: "Save as draft" },
-  { id: "now", label: "Post now" },
-  { id: "custom", label: "Custom time" },
-  { id: "best", label: "Your best times to post" },
-]
+  { id: 'draft', label: 'Save as draft' },
+  { id: 'now', label: 'Post now' },
+  { id: 'custom', label: 'Custom time' },
+  { id: 'best', label: 'Your best times to post' },
+];
 
 export function PostForm({ initialData, mode }: PostFormProps) {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Form state
   const [formData, setFormData] = useState({
     images: initialData?.images || [sampleImages[0]],
-    caption: initialData?.caption || "",
-    platform: initialData?.platform || "instagram",
-    strategy: initialData?.strategy || "",
-    scheduleOption: initialData?.status === "scheduled" ? "custom" : "draft",
-    scheduledDate: initialData?.scheduledDate || "",
+    caption: initialData?.caption || '',
+    platform: initialData?.platform || 'instagram',
+    strategy: initialData?.strategy || '',
+    scheduleOption: initialData?.status === 'scheduled' ? 'custom' : 'draft',
+    scheduledDate: initialData?.scheduledDate || '',
     autoPost: initialData?.autoPost ?? true,
-    shareToFacebook: initialData?.shareToPlatforms?.includes("facebook") || false,
-  })
-  
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [activeTab, setActiveTab] = useState<"post" | "stories" | "reels">("post")
-  
+    shareToFacebook: initialData?.shareToPlatforms?.includes('facebook') || false,
+  });
+
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<'post' | 'stories' | 'reels'>('post');
+
   // Week calendar
-  const today = new Date()
+  const today = new Date();
   const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today)
-    date.setDate(today.getDate() + i - 1)
-    return date
-  })
-  const [selectedDate, setSelectedDate] = useState(today)
-  
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const date = new Date(today);
+    date.setDate(today.getDate() + i - 1);
+    return date;
+  });
+  const [selectedDate, setSelectedDate] = useState(today);
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const addImage = () => {
-    const availableImages = sampleImages.filter(img => !formData.images.includes(img))
+    const availableImages = sampleImages.filter((img) => !formData.images.includes(img));
     if (availableImages.length > 0) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, availableImages[0]]
-      }))
+        images: [...prev.images, availableImages[0]],
+      }));
     }
-  }
+  };
 
   const handleSubmit = async (saveAsDraft: boolean = true) => {
-    setIsSubmitting(true)
-    
+    setIsSubmitting(true);
+
     try {
-      const status = saveAsDraft ? "draft" : formData.scheduleOption === "now" ? "published" : "scheduled"
-      
+      const status =
+        saveAsDraft ? 'draft'
+        : formData.scheduleOption === 'now' ? 'published'
+        : 'scheduled';
+
       const payload = {
         images: formData.images,
         caption: formData.caption,
         status,
         platform: formData.platform,
         strategy: formData.strategy || undefined,
-        scheduledDate: formData.scheduleOption === "custom" && formData.scheduledDate 
-          ? formData.scheduledDate 
-          : undefined,
+        scheduledDate:
+          formData.scheduleOption === 'custom' && formData.scheduledDate ? formData.scheduledDate : undefined,
         autoPost: formData.autoPost,
-        shareToPlatforms: formData.shareToFacebook ? ["facebook"] : [],
-      }
-      
-      const url = mode === "edit" && initialData 
-        ? `/api/posts/${initialData.id}` 
-        : "/api/posts"
-      
-      const method = mode === "edit" ? "PUT" : "POST"
-      
+        shareToPlatforms: formData.shareToFacebook ? ['facebook'] : [],
+      };
+
+      const url = mode === 'edit' && initialData ? `/api/posts/${initialData.id}` : '/api/posts';
+
+      const method = mode === 'edit' ? 'PUT' : 'POST';
+
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-      })
-      
+      });
+
       if (response.ok) {
-        router.push("/dashboard/planning")
-        router.refresh()
+        router.push('/dashboard/planning');
+        router.refresh();
       }
     } catch (error) {
-      console.error("Failed to save post:", error)
+      console.error('Failed to save post:', error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDiscard = () => {
-    router.push("/dashboard/planning")
-  }
+    router.push('/dashboard/planning');
+  };
 
   return (
     <div className="min-h-[calc(100vh-88px)] bg-background">
@@ -129,37 +127,35 @@ export function PostForm({ initialData, mode }: PostFormProps) {
           <button className="rounded-full p-2 hover:bg-secondary transition-colors">
             <ChevronLeft className="h-5 w-5 text-muted-foreground" />
           </button>
-          
+
           <div className="flex items-center gap-2">
             {weekDays.map((date, index) => {
-              const isSelected = date.toDateString() === selectedDate.toDateString()
-              const isToday = date.toDateString() === today.toDateString()
-              
+              const isSelected = date.toDateString() === selectedDate.toDateString();
+              const isToday = date.toDateString() === today.toDateString();
+
               return (
                 <button
                   key={index}
                   onClick={() => setSelectedDate(date)}
                   className={`flex flex-col items-center rounded-[12px] px-4 py-2 transition-colors ${
-                    isSelected 
-                      ? "bg-[#A7D7A0] text-[#2E2E2E]" 
-                      : isToday 
-                        ? "bg-secondary text-foreground"
-                        : "hover:bg-secondary text-muted-foreground"
-                  }`}
-                >
+                    isSelected ? 'bg-[#A7D7A0] text-[#2E2E2E]'
+                    : isToday ? 'bg-secondary text-foreground'
+                    : 'hover:bg-secondary text-muted-foreground'
+                  }`}>
                   <span className="text-xs">{date.getDate()}</span>
                   <span className="text-sm font-medium">{dayNames[date.getDay()]}</span>
                 </button>
-              )
+              );
             })}
           </div>
-          
+
           <div className="flex items-center gap-4">
             <button className="rounded-full p-2 hover:bg-secondary transition-colors">
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </button>
             <span className="text-sm font-medium text-primary">
-              {monthNames[selectedDate.getMonth()]} - {monthNames[(selectedDate.getMonth() + 1) % 12]} {selectedDate.getFullYear()}
+              {monthNames[selectedDate.getMonth()]} - {monthNames[(selectedDate.getMonth() + 1) % 12]}{' '}
+              {selectedDate.getFullYear()}
             </span>
           </div>
         </div>
@@ -170,27 +166,24 @@ export function PostForm({ initialData, mode }: PostFormProps) {
           {/* Tabs */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div className="flex items-center gap-6">
-              {(["post", "stories", "reels"] as const).map((tab) => (
+              {(['post', 'stories', 'reels'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`text-sm font-medium uppercase tracking-wide transition-colors ${
-                    activeTab === tab 
-                      ? "text-foreground" 
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                    activeTab === tab ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}>
                   {tab}
                 </button>
               ))}
             </div>
-            
+
             <div className="flex items-center gap-4">
               <button className="rounded-full p-2 hover:bg-secondary transition-colors">
                 <Settings2 className="h-5 w-5 text-muted-foreground" />
               </button>
               <span className="text-sm text-muted-foreground">
-                {formData.scheduleOption === "draft" ? "Unscheduled" : "Scheduled"}
+                {formData.scheduleOption === 'draft' ? 'Unscheduled' : 'Scheduled'}
               </span>
             </div>
           </div>
@@ -212,19 +205,13 @@ export function PostForm({ initialData, mode }: PostFormProps) {
 
               {/* Main Image Preview */}
               <div className="relative aspect-square rounded-[20px] overflow-hidden bg-secondary mb-4">
-                {formData.images[selectedImageIndex] ? (
-                  <Image
-                    src={formData.images[selectedImageIndex]}
-                    alt="Preview"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
+                {formData.images[selectedImageIndex] ?
+                  <Image src={formData.images[selectedImageIndex]} alt="Preview" fill className="object-cover" />
+                : <div className="flex items-center justify-center h-full">
                     <ImageIcon className="h-16 w-16 text-muted-foreground" />
                   </div>
-                )}
-                
+                }
+
                 {/* Edit overlay button */}
                 <button className="absolute bottom-4 left-4 rounded-full bg-[#2E2E2E]/80 p-2 text-white hover:bg-[#2E2E2E] transition-colors">
                   <Settings2 className="h-4 w-4" />
@@ -238,24 +225,17 @@ export function PostForm({ initialData, mode }: PostFormProps) {
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
                     className={`relative w-16 h-16 rounded-[12px] overflow-hidden border-2 transition-all ${
-                      index === selectedImageIndex 
-                        ? "border-primary ring-2 ring-primary/20" 
-                        : "border-transparent hover:border-border"
-                    }`}
-                  >
-                    <Image
-                      src={img}
-                      alt={`Thumbnail ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+                      index === selectedImageIndex ?
+                        'border-primary ring-2 ring-primary/20'
+                      : 'border-transparent hover:border-border'
+                    }`}>
+                    <Image src={img} alt={`Thumbnail ${index + 1}`} fill className="object-cover" />
                   </button>
                 ))}
                 {formData.images.length < 4 && (
                   <button
                     onClick={addImage}
-                    className="w-16 h-16 rounded-[12px] border-2 border-dashed border-border flex items-center justify-center hover:border-primary hover:bg-secondary transition-all"
-                  >
+                    className="w-16 h-16 rounded-[12px] border-2 border-dashed border-border flex items-center justify-center hover:border-primary hover:bg-secondary transition-all">
                     <Plus className="h-5 w-5 text-muted-foreground" />
                   </button>
                 )}
@@ -268,12 +248,13 @@ export function PostForm({ initialData, mode }: PostFormProps) {
               <div className="flex items-center justify-end p-4 border-b border-border">
                 <select
                   value={formData.strategy}
-                  onChange={(e) => setFormData(prev => ({ ...prev, strategy: e.target.value }))}
-                  className="rounded-[12px] bg-[#A7D7A0] px-4 py-2 text-sm font-medium text-[#2E2E2E] border-0 cursor-pointer"
-                >
+                  onChange={(e) => setFormData((prev) => ({ ...prev, strategy: e.target.value }))}
+                  className="rounded-[12px] bg-[#A7D7A0] px-4 py-2 text-sm font-medium text-[#2E2E2E] border-0 cursor-pointer">
                   <option value="">Strategy: Choose One</option>
                   {strategies.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -282,12 +263,12 @@ export function PostForm({ initialData, mode }: PostFormProps) {
               <div className="flex-1 p-6">
                 <textarea
                   value={formData.caption}
-                  onChange={(e) => setFormData(prev => ({ ...prev, caption: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, caption: e.target.value }))}
                   placeholder="Craft the perfect caption here..."
                   className="w-full h-48 rounded-[16px] border border-border bg-background p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                   maxLength={2200}
                 />
-                
+
                 {/* Caption Tools */}
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-4">
@@ -307,7 +288,7 @@ export function PostForm({ initialData, mode }: PostFormProps) {
                       <MapPin className="h-5 w-5" />
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>0 / 30</span>
                     <span className="mx-2">|</span>
@@ -324,36 +305,32 @@ export function PostForm({ initialData, mode }: PostFormProps) {
                   <div className="space-y-3">
                     {scheduleOptions.map((option) => (
                       <label key={option.id} className="flex items-center gap-3 cursor-pointer">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                          formData.scheduleOption === option.id 
-                            ? "border-primary bg-primary" 
-                            : "border-border"
-                        }`}>
-                          {formData.scheduleOption === option.id && (
-                            <div className="w-2 h-2 rounded-full bg-white" />
-                          )}
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                            formData.scheduleOption === option.id ? 'border-primary bg-primary' : 'border-border'
+                          }`}>
+                          {formData.scheduleOption === option.id && <div className="w-2 h-2 rounded-full bg-white" />}
                         </div>
-                        <span className={`text-sm ${
-                          formData.scheduleOption === option.id 
-                            ? "text-foreground font-medium" 
-                            : "text-muted-foreground"
-                        }`}>
+                        <span
+                          className={`text-sm ${
+                            formData.scheduleOption === option.id ?
+                              'text-foreground font-medium'
+                            : 'text-muted-foreground'
+                          }`}>
                           {option.label}
                         </span>
                       </label>
                     ))}
-                    
-                    {formData.scheduleOption === "best" && (
-                      <p className="text-xs text-muted-foreground ml-8">
-                        When your audience is most online
-                      </p>
+
+                    {formData.scheduleOption === 'best' && (
+                      <p className="text-xs text-muted-foreground ml-8">When your audience is most online</p>
                     )}
-                    
-                    {formData.scheduleOption === "custom" && (
+
+                    {formData.scheduleOption === 'custom' && (
                       <input
                         type="datetime-local"
                         value={formData.scheduledDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, scheduledDate: e.target.value }))}
                         className="ml-8 rounded-[12px] border border-border bg-background px-3 py-2 text-sm"
                       />
                     )}
@@ -366,17 +343,18 @@ export function PostForm({ initialData, mode }: PostFormProps) {
                   <label className="flex items-center justify-between cursor-pointer mb-4">
                     <div className="flex items-center gap-2">
                       <Instagram className="h-4 w-4 text-[#E1306C]" />
-                      <span className="text-sm text-muted-foreground">@trendbloom</span>
+                      <span className="text-sm text-muted-foreground">@firework</span>
                     </div>
                     <button
-                      onClick={() => setFormData(prev => ({ ...prev, autoPost: !prev.autoPost }))}
+                      onClick={() => setFormData((prev) => ({ ...prev, autoPost: !prev.autoPost }))}
                       className={`relative w-12 h-6 rounded-full transition-colors ${
-                        formData.autoPost ? "bg-primary" : "bg-border"
-                      }`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                        formData.autoPost ? "left-7" : "left-1"
-                      }`} />
+                        formData.autoPost ? 'bg-primary' : 'bg-border'
+                      }`}>
+                      <div
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          formData.autoPost ? 'left-7' : 'left-1'
+                        }`}
+                      />
                     </button>
                   </label>
 
@@ -387,17 +365,18 @@ export function PostForm({ initialData, mode }: PostFormProps) {
                   <label className="flex items-center justify-between cursor-pointer">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded-full bg-[#1877F2]" />
-                      <span className="text-sm text-muted-foreground">TrendBloom Page</span>
+                      <span className="text-sm text-muted-foreground">FireWork Page</span>
                     </div>
                     <button
-                      onClick={() => setFormData(prev => ({ ...prev, shareToFacebook: !prev.shareToFacebook }))}
+                      onClick={() => setFormData((prev) => ({ ...prev, shareToFacebook: !prev.shareToFacebook }))}
                       className={`relative w-12 h-6 rounded-full transition-colors ${
-                        formData.shareToFacebook ? "bg-primary" : "bg-border"
-                      }`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                        formData.shareToFacebook ? "left-7" : "left-1"
-                      }`} />
+                        formData.shareToFacebook ? 'bg-primary' : 'bg-border'
+                      }`}>
+                      <div
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          formData.shareToFacebook ? 'left-7' : 'left-1'
+                        }`}
+                      />
                     </button>
                   </label>
                 </div>
@@ -408,16 +387,18 @@ export function PostForm({ initialData, mode }: PostFormProps) {
                 <button
                   onClick={handleDiscard}
                   disabled={isSubmitting}
-                  className="rounded-[16px] border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors disabled:opacity-50"
-                >
+                  className="rounded-[16px] border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors disabled:opacity-50">
                   Discard Draft
                 </button>
                 <button
                   onClick={() => handleSubmit(true)}
                   disabled={isSubmitting || !formData.caption.trim()}
-                  className="rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {isSubmitting ? "Saving..." : mode === "edit" ? "Update Post" : "Save as Draft"}
+                  className="rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                  {isSubmitting ?
+                    'Saving...'
+                  : mode === 'edit' ?
+                    'Update Post'
+                  : 'Save as Draft'}
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
@@ -426,5 +407,5 @@ export function PostForm({ initialData, mode }: PostFormProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
