@@ -118,20 +118,24 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <button className="w-full mt-2 flex items-center justify-center gap-2 rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-all">
+            <button className="w-full mt-2 flex items-center justify-center gap-2 rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] hover:scale-110 transition-all">
               Login
             </button>
           </form>
 
-          <button className="w-full mt-2 flex items-center justify-between rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-all">
-            <span className="ml-20">Login by Instagram</span>
-            <Image src="/instagram.jpeg" alt="Instagram Logo" width={20} height={20} className="mr-22" />
-          </button>
+          <div className="justify-center text-center mt-3">
+            <p className="text-sm">Or continue with</p>
+          </div>
 
-          <button className="w-full mt-2 flex items-center justify-between rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-all">
-            <span className="ml-26">Login by Twitter</span>
-            <Image src="/twitter.jpeg" alt="Twitter Logo" width={20} height={20} className="mr-22" />
-          </button>
+          <div className="flex gap-3">
+            <button className="w-full mt-2 flex items-center justify-center rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] hover:scale-110 transition-all">
+              <Image src="/instagram.jpeg" alt="Instagram Logo" width={25} height={25} />
+            </button>
+
+            <button className="w-full mt-2 flex items-center justify-center rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] hover:scale-110 transition-all">
+              <Image src="/twitter.jpeg" alt="Twitter Logo" width={25} height={25} />
+            </button>
+          </div>
 
           <p className="text-sm text-center text-muted-foreground mt-6">
             Don’t have an account?{' '}

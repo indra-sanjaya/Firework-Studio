@@ -118,9 +118,8 @@ export default function RegisterPage() {
               className="w-full rounded-[12px] border border-border px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#A7D7A0] outline-none"
             />
 
-            <button className="w-full mt-2 flex items-center justify-center gap-2 rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-all">
+            <button className="w-full mt-2 flex items-center justify-center gap-2 rounded-[16px] bg-[#A7D7A0] px-6 py-3 text-sm font-medium text-[#2E2E2E] hover:bg-[#8BC98B] transition-all hover:scale-110">
               Register
-              <ArrowRight className="h-4 w-4" />
             </button>
           </form>
 
