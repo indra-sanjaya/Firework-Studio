@@ -1,21 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import {
-  Plus,
-  ImageIcon,
-  ChevronRight,
-  AtSign,
-  Link2,
-  Smile,
-  MapPin,
-  Hash,
-  CalendarDays,
-  Clock,
-  Layers,
-} from 'lucide-react';
+import { Plus, ImageIcon, ChevronRight, AtSign, Link2, MapPin, Hash, CalendarDays, Clock, Layers } from 'lucide-react';
 import { type Post, sampleImages, strategies } from '@/lib/posts-data';
 
 interface PostFormProps {
@@ -25,12 +13,47 @@ interface PostFormProps {
   setFormData: React.Dispatch<React.SetStateAction<any>>;
 }
 
+interface User {
+  id: string;
+  username: string;
+}
+
+const dummyUsers: User[] = [
+  { id: '1', username: 'alice' },
+  { id: '2', username: 'bob' },
+  { id: '3', username: 'charlie' },
+];
+
+const dummyHashtags = ['#fitness', '#travel', '#food', '#coding'];
+const mockLocations = ['New York', 'Paris', 'Tokyo', 'Rio de Janeiro'];
+
 export function PostForm({ initialData, mode, formData, setFormData }: PostFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [activeDropdown, setActiveDropdown] = useState<'mention' | 'hashtag' | 'link' | 'location' | null>(null);
+  const [dropdownFilter, setDropdownFilter] = useState('');
+  const [linkInput, setLinkInput] = useState('');
 
   const isScheduled = !!formData.scheduledDate;
+
+  const insertAtCursor = (insertText: string) => {
+    if (!textareaRef.current) return;
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const newText = formData.caption.substring(0, start) + insertText + formData.caption.substring(end);
+    setFormData((prev: any) => ({ ...prev, caption: newText }));
+    setActiveDropdown(null);
+    setDropdownFilter('');
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + insertText.length;
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
 
   const addImage = () => {
     const available = sampleImages.filter((img) => !formData.images.includes(img));
@@ -65,13 +88,39 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
     }
   };
 
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!textareaRef.current) return;
+    const cursor = textareaRef.current.selectionStart;
+    const text = textareaRef.current.value.substring(0, cursor);
+
+    const matchMention = /@(\w*)$/.exec(text);
+    const matchHashtag = /#(\w*)$/.exec(text);
+    const matchLink = /(https?:\/\/[^\s]*)$/.exec(text);
+
+    if (matchMention) {
+      setActiveDropdown('mention');
+      setDropdownFilter(matchMention[1]);
+    } else if (matchHashtag) {
+      setActiveDropdown('hashtag');
+      setDropdownFilter(matchHashtag[1]);
+    } else if (matchLink) {
+      setActiveDropdown('link');
+      setLinkInput(matchLink[1]);
+    } else if (activeDropdown === 'mention' || activeDropdown === 'hashtag' || activeDropdown === 'link') {
+      setActiveDropdown(null);
+      setDropdownFilter('');
+      setLinkInput('');
+    }
+  };
+
+  const filteredUsers = dummyUsers.filter((u) => u.username.includes(dropdownFilter));
+  const filteredHashtags = dummyHashtags.filter((tag) => tag.includes(dropdownFilter));
+
   return (
-    <div className="flex flex-col h-full">
-      {/* ── SECTION 1: Image Uploader ── */}
+    <div className="flex flex-col h-full relative">
+      {/* ── Image Uploader ── */}
       <div className="p-5 border-b border-border">
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Media</p>
-
-        {/* Main image */}
         <div className="relative aspect-square w-full rounded-[14px] bg-secondary overflow-hidden mb-3">
           {formData.images[selectedImageIndex] ?
             <Image src={formData.images[selectedImageIndex]} alt="preview" fill className="object-cover" />
@@ -81,8 +130,6 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
             </div>
           }
         </div>
-
-        {/* Thumbnails */}
         <div className="flex gap-2 flex-wrap">
           {formData.images.map((img: string, i: number) => (
             <button
@@ -102,12 +149,11 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
         </div>
       </div>
 
-      {/* ── SECTION 2: Platform + Type ── */}
+      {/* ── Platform + Type ── */}
       <div className="px-5 py-4 border-b border-border">
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           Publish Settings
         </p>
-
         <div className="grid grid-cols-2 gap-2 mb-2">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground">Platform</label>
@@ -119,7 +165,6 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
               <option value="twitter">Twitter</option>
             </select>
           </div>
-
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground">Post Type</label>
             <select
@@ -133,7 +178,6 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
           </div>
         </div>
 
-        {/* Date + Time row */}
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground flex items-center gap-1">
@@ -153,7 +197,6 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
               className="rounded-[10px] border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-muted-foreground flex items-center gap-1">
               <Clock className="h-3 w-3" /> Time
@@ -173,46 +216,98 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
             />
           </div>
         </div>
-
-        {/* Status pill */}
-        <div className="mt-3 flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-              isScheduled ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-            }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${isScheduled ? 'bg-green-500' : 'bg-yellow-500'}`} />
-            {isScheduled ? 'Scheduled' : 'Draft'}
-          </span>
-        </div>
       </div>
 
-      {/* ── SECTION 3: Caption ── */}
-      <div className="px-5 py-4 border-b border-border flex-1">
+      {/* ── Caption ── */}
+      <div className="px-5 py-4 border-b border-border flex-1 relative">
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Caption</p>
-
         <textarea
+          ref={textareaRef}
           value={formData.caption}
           onChange={(e) => setFormData((prev: any) => ({ ...prev, caption: e.target.value }))}
+          onClick={handleKeyUp}
+          onKeyUp={handleKeyUp}
           placeholder="Write your caption..."
           className="w-full h-28 rounded-[12px] border bg-background p-3 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/50"
         />
 
-        {/* Toolbar + counter */}
-        <div className="flex items-center justify-between mt-2 text-muted-foreground">
+        {/* Toolbar */}
+        <div className="flex items-center justify-between mt-2 text-muted-foreground relative">
           <div className="flex gap-3">
-            {[AtSign, Hash, Link2, Smile, MapPin].map((Icon, i) => (
-              <button key={i} className="hover:text-foreground transition-colors">
-                <Icon className="h-3.5 w-3.5" />
-              </button>
-            ))}
+            <button onClick={() => setActiveDropdown(activeDropdown === 'mention' ? null : 'mention')}>
+              <AtSign className="h-3.5 w-3.5 hover:text-foreground transition-colors" />
+            </button>
+            <button onClick={() => setActiveDropdown(activeDropdown === 'hashtag' ? null : 'hashtag')}>
+              <Hash className="h-3.5 w-3.5 hover:text-foreground transition-colors" />
+            </button>
+            <button onClick={() => setActiveDropdown(activeDropdown === 'link' ? null : 'link')}>
+              <Link2 className="h-3.5 w-3.5 hover:text-foreground transition-colors" />
+            </button>
+            <button onClick={() => setActiveDropdown(activeDropdown === 'location' ? null : 'location')}>
+              <MapPin className="h-3.5 w-3.5 hover:text-foreground transition-colors" />
+            </button>
           </div>
-          <span className={`text-[11px] ${formData.caption.length > 2000 ? 'text-red-500' : ''}`}>
+          <span className={`text-[11px] ${formData.caption.length > 2200 ? 'text-red-500' : ''}`}>
             {formData.caption.length} / 2200
           </span>
         </div>
+
+        {/* Dropdowns */}
+        {activeDropdown === 'mention' && (
+          <div className="absolute z-10 mt-1 border rounded bg-white shadow w-64 max-h-32 overflow-y-auto">
+            {filteredUsers.map((user) => (
+              <div
+                key={user.id}
+                className="p-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => insertAtCursor(`@${user.username} `)}>
+                @{user.username}
+              </div>
+            ))}
+          </div>
+        )}
+        {activeDropdown === 'hashtag' && (
+          <div className="absolute z-10 mt-1 border rounded bg-white shadow w-64 max-h-32 overflow-y-auto">
+            {filteredHashtags.map((tag) => (
+              <div key={tag} className="p-2 hover:bg-gray-100 cursor-pointer" onClick={() => insertAtCursor(`${tag} `)}>
+                {tag}
+              </div>
+            ))}
+          </div>
+        )}
+        {activeDropdown === 'link' && (
+          <div className="absolute z-10 mt-1 border rounded bg-white shadow p-2 w-64">
+            <input
+              type="text"
+              className="w-full border rounded px-2 py-1 text-sm"
+              placeholder="Paste URL..."
+              value={linkInput}
+              onChange={(e) => setLinkInput(e.target.value)}
+            />
+            <button
+              className="mt-1 px-2 py-1 bg-primary text-white rounded text-sm"
+              onClick={() => {
+                insertAtCursor(linkInput + ' ');
+                setLinkInput('');
+              }}>
+              Insert
+            </button>
+          </div>
+        )}
+        {activeDropdown === 'location' && (
+          <div className="absolute z-10 mt-1 border rounded bg-white shadow p-2 w-64 flex flex-wrap gap-1">
+            {mockLocations.map((loc) => (
+              <button
+                key={loc}
+                className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                onClick={() => insertAtCursor(`📍${loc} `)}>
+                {loc}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ── SECTION 4: Strategy ── */}
+      {/* ── Strategy ── */}
       <div className="px-5 py-4 border-b border-border">
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1">
           <Layers className="h-3 w-3" /> Strategy
@@ -230,7 +325,7 @@ export function PostForm({ initialData, mode, formData, setFormData }: PostFormP
         </select>
       </div>
 
-      {/* ── FOOTER: Actions ── */}
+      {/* ── Footer ── */}
       <div className="px-5 py-4 flex items-center justify-end gap-2">
         <button
           onClick={() => router.back()}
