@@ -5,7 +5,7 @@ import { ApifyClient } from 'apify-client';
 import { GoogleGenAI } from '@google/genai';
 
 // ---------------- ENV ----------------
-const apify = new ApifyClient(); //api token here
+const apify = new ApifyClient();
 
 // ---------------- AI → Topic URLs ----------------
 async function getTopicUrls(interests: string[] = []): Promise<string[]> {
@@ -166,7 +166,7 @@ Output:
 }
 `;
 
-  const ai = new GoogleGenAI(); //api key here
+  const ai = new GoogleGenAI();
 
   const response = await ai.models.generateContent({
     model: 'gemini-3.1-flash-lite-preview',
