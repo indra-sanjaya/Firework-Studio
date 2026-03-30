@@ -1,44 +1,44 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
-import { PostForm } from "@/components/dashboard/post-form"
-import { type Post } from "@/lib/posts-data"
-import { Spinner } from "@/components/ui/spinner"
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { PostForm } from '@/components/dashboard/post-form';
+import { type Post } from '@/lib/posts-data';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function EditPostPage() {
-  const params = useParams()
-  const [post, setPost] = useState<Post | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const params = useParams();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`/api/posts/${params.id}`)
+        const response = await fetch(`/api/posts/${params.id}`);
         if (!response.ok) {
-          throw new Error("Post not found")
+          throw new Error('Post not found');
         }
-        const data = await response.json()
-        setPost(data)
+        const data = await response.json();
+        setPost(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load post")
+        setError(err instanceof Error ? err.message : 'Failed to load post');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
     if (params.id) {
-      fetchPost()
+      fetchPost();
     }
-  }, [params.id])
+  }, [params.id]);
 
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-88px)] flex items-center justify-center">
         <Spinner className="h-8 w-8 text-primary" />
       </div>
-    )
+    );
   }
 
   if (error || !post) {
@@ -49,8 +49,8 @@ export default function EditPostPage() {
           <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
-    )
+    );
   }
 
-  return <PostForm mode="edit" initialData={post} />
+  return <PostForm mode="edit" initialData={post} />;
 }

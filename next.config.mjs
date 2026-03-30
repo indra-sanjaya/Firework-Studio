@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  serverExternalPackages: ['@google/genai', 'apify-client'],
 };
 
 export default nextConfig;

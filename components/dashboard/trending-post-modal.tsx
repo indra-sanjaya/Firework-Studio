@@ -16,6 +16,7 @@ interface TrendingPost {
     name: string;
     avatar?: string;
   };
+  url: string;
 }
 
 interface TrendingPostModalProps {
@@ -167,7 +168,9 @@ export function TrendingPostModal({ post, open, onOpenChange, onSave, isSaved = 
               </button>
 
               {/* Original — fixed width */}
-              <button className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] border border-border bg-background hover:bg-secondary text-xs font-medium transition-colors text-foreground flex-shrink-0">
+              <button
+                className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] border border-border bg-background hover:bg-secondary text-xs font-medium transition-colors text-foreground flex-shrink-0"
+                onClick={() => window.open(post.url, '_blank')}>
                 <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
                 Original
               </button>
