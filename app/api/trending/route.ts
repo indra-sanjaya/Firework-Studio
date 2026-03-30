@@ -5,7 +5,7 @@ import { ApifyClient } from 'apify-client';
 import { GoogleGenAI } from '@google/genai';
 
 // ---------------- ENV ----------------
-const apify = new ApifyClient({ token: 'apify_api_8EPq8vy5xxIr5xowLpgc0MBwUnd9jX3EzXiP' });
+// const apify = new ApifyClient({ token: 'apify_api_8EPq8vy5xxIr5xowLpgc0MBwUnd9jX3EzXiP' });
 
 // ---------------- AI → Topic URLs ----------------
 async function getTopicUrls(interests: string[] = []): Promise<string[]> {
