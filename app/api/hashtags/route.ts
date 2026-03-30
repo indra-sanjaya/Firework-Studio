@@ -3,7 +3,7 @@ export const runtime = 'nodejs';
 
 import { ApifyClient } from 'apify-client';
 
-const apify = new ApifyClient(); //api token here
+const apify = new ApifyClient();
 
 // ---------------- Parse "9.27 m" / "339.08 k" → number ----------------
 function parseCount(info: string): number {
